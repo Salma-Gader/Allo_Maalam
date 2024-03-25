@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import "./login.css";
+import React, { useState } from "react";
+import "./Register.css";
 import login from "../../../assets/Login.jpg";
 import toastGenerator from "../../../helpers/toastGenerator";
 import axios from "axios";
@@ -9,26 +9,21 @@ import {
   MDBCard,
   MDBCardBody,
   MDBInput,
-  MDBIcon,
   MDBRow,
   MDBCol,
 } from "mdb-react-ui-kit";
 import { ToastContainer } from "react-toastify";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import useLocalStorage from "react-use-localstorage";
+import { Link, useNavigate } from "react-router-dom";
 
-const Login = () => {
-  const location = useLocation();
+const Register = () => {
+  
   const navigation = useNavigate();
-  useEffect(() => {
-    toastGenerator("success", location.state);
-  }, [location.state]);
-
   const [user, setUser] = useState({
+    name: "",
     email: "",
     password: "",
+    confirm_password: "",
   });
-  const [token, setToken] = useLocalStorage("token", "");
 
   const HandleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -36,28 +31,33 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (user.email.trim() === "") {
+
+    if (user.name.trim() === "") {
+      toastGenerator("error", "Field Name is Required");
+    } else if (user.email.trim() === "") {
       toastGenerator("error", "Field Email is Required");
     } else if (user.password.trim() === "") {
       toastGenerator("error", "Field Password is Required");
+    } else if (user.confirm_password.trim() === "") {
+      toastGenerator("error", "Field Cofirm Password is Required");
+    } else if (user.password.trim() !== user.confirm_password.trim()) {
+      toastGenerator("error", "Password and Confirm Password Not Match");
     }
+
     axios
-      .post(`http://localhost:8000/auth/login`, { ...user })
+      .post(`http://localhost:8000/auth/register`, { ...user })
       .then((data) => {
-        if (data.data.message) {
-          setToken(data.data.token);
-          toastGenerator("success", data.data.message);
-          setTimeout(() => {
-            navigation("/");
-          }, 4000);
-        } else toastGenerator("error", data.data);
+        if (data.data) {
+          navigation("/login", { state: data.data });
+        } else {
+          console.log(data.response.data.message);
+          toastGenerator("error", data.response.data.message);
+        }
       })
       .catch((error) => {
         console.log(error);
       });
   };
-  console.log(token);
   return (
     <div className="mx-auto w-75">
       <form>
@@ -73,14 +73,23 @@ const Login = () => {
               >
                 <MDBCardBody className="p-5 shadow-5 text-center">
                   <h2 className="fw-bold mb-5" style={{ color: "#395b71" }}>
-                    Login now
+                    Sign up now
                   </h2>
 
+                  <MDBInput
+                    wrapperClass="mb-4"
+                    label="Name"
+                    name="name"
+                    type="name"
+                    value={user.name}
+                    onChange={HandleChange}
+                  />
                   <MDBInput
                     wrapperClass="mb-4"
                     label="Email"
                     name="email"
                     type="email"
+                    value={user.email}
                     onChange={HandleChange}
                   />
                   <MDBInput
@@ -88,9 +97,17 @@ const Login = () => {
                     label="Password"
                     name="password"
                     type="password"
+                    value={user.password}
                     onChange={HandleChange}
                   />
-
+                  <MDBInput
+                    wrapperClass="mb-4"
+                    label="Confirm Password"
+                    name="confirm_password"
+                    type="password"
+                    value={user.confirm_password}
+                    onChange={HandleChange}
+                  />
                   <MDBBtn
                     className="w-100 mb-4"
                     size="md"
@@ -102,52 +119,15 @@ const Login = () => {
                   >
                     sign up
                   </MDBBtn>
-
-                  <div className="text-center">
-                    <Link to={"/Register"}>create account</Link>
-                    <p>or sign up with:</p>
-
-                    <MDBBtn
-                      tag="a"
-                      color="none"
-                      className="mx-3"
-                      style={{ color: "#395b71" }}
-                    >
-                      <MDBIcon fab icon="facebook-f" size="sm" />
-                    </MDBBtn>
-
-                    <MDBBtn
-                      tag="a"
-                      color="none"
-                      className="mx-3"
-                      style={{ color: "#395b71" }}
-                    >
-                      <MDBIcon fab icon="twitter" size="sm" />
-                    </MDBBtn>
-
-                    <MDBBtn
-                      tag="a"
-                      color="none"
-                      className="mx-3"
-                      style={{ color: "#395b71" }}
-                    >
-                      <MDBIcon fab icon="google" size="sm" />
-                    </MDBBtn>
-
-                    <MDBBtn
-                      tag="a"
-                      color="none"
-                      className="mx-3"
-                      style={{ color: "#395b71" }}
-                    >
-                      <MDBIcon fab icon="github" size="sm" />
-                    </MDBBtn>
-                  </div>
                 </MDBCardBody>
               </MDBCard>
             </MDBCol>
             <MDBCol col="6">
-              <img src={login} class="w-100 rounded-4 shadow-4" alt="image" />
+              <img
+                src={login}
+                class="w-100 rounded-4 shadow-4"
+                alt="login view"
+              />
             </MDBCol>
           </MDBRow>
         </MDBContainer>
@@ -157,4 +137,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

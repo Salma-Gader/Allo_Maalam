@@ -13,9 +13,8 @@ app.use(ErrorHandler);
 // CORS Configuration
 app.use(
   cors({
-    origin: ["http://localhost:8000"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: ["http://localhost:3000"],
+    methods: ["*"],
   })
 );
 
